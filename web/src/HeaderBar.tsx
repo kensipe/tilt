@@ -1,20 +1,22 @@
 import React from "react"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
+import { ReactComponent as DetailViewIcon } from "./assets/svg/detail-view-icon.svg"
 import { ReactComponent as LogoWordmarkSvg } from "./assets/svg/logo-wordmark.svg"
+import { ReactComponent as TableViewIcon } from "./assets/svg/table-view-icon.svg"
 import { CustomNav } from "./CustomNav"
-import { GlobalNav } from "./GlobalNav"
+import { GlobalNav, MenuButtonMixin } from "./GlobalNav"
 import { usePathBuilder } from "./PathBuilder"
 import {
   AllResourceStatusSummary,
   ResourceStatusSummaryRoot,
 } from "./ResourceStatusSummary"
 import { useSnapshotAction } from "./snapshot"
+import SrOnly from "./SrOnly"
 import { AnimDuration, Color, Font, FontSize, SizeUnit } from "./style-helpers"
-import { TargetType } from "./types"
 import { showUpdate } from "./UpdateDialog"
 
-const HeaderBarRoot = styled.div`
+const HeaderBarRoot = styled.nav`
   display: flex;
   align-items: center;
   padding-left: ${SizeUnit(1)};
@@ -53,6 +55,40 @@ const AllResourcesLink = styled(Link)`
   text-decoration: none;
 `
 
+const ViewLinkText = styled.span`
+  bottom: 0;
+  color: ${Color.gray7};
+  font-family: ${Font.monospace};
+  font-size: ${FontSize.smallest};
+  opacity: 0;
+  position: absolute;
+  text-align: center;
+  transition: opacity ${AnimDuration.default} ease;
+  white-space: nowrap;
+  width: 100%;
+`
+
+const ViewLink = styled(Link)`
+  ${MenuButtonMixin}
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+  text-decoration: none;
+
+  &:is(:hover, :focus, :active) {
+    ${ViewLinkText} {
+      opacity: 1;
+    }
+  }
+`
+
+const ViewLinkSection = styled.div`
+  align-items: center;
+  display: flex;
+  margin-left: ${SizeUnit(1)};
+  margin-right: ${SizeUnit(1)};
+`
+
 type HeaderBarProps = {
   view: Proto.webviewView
 }
@@ -65,10 +101,6 @@ export default function HeaderBar(props: HeaderBarProps) {
   let runningBuild = session?.runningTiltBuild
   let suggestedVersion = session?.suggestedTiltVersion
   let resources = view?.uiResources || []
-  let hasK8s = resources.some((r) => {
-    let specs = r.status?.specs ?? []
-    return specs.some((spec) => spec.type === TargetType.K8s)
-  })
 
   let globalNavProps = {
     isSnapshot,
@@ -84,15 +116,30 @@ export default function HeaderBar(props: HeaderBarProps) {
 
   const pb = usePathBuilder()
 
+  // TODO: Get current link ... or perhaps this is just set in props lol
+  // TODO: Add aria-current property to links
+
+  // TODO (lizz): Consider refactoring to more semantic html with <ul> + <li> items
   return (
-    <HeaderBarRoot>
-      <Link to="/overview">
+    <HeaderBarRoot aria-label="Dashboard menu">
+      <Link to="/overview" role="menuitem" aria-label="Tilt home">
         <Logo width="57px" />
       </Link>
-      <HeaderDivider />
-      <AllResourcesLink to={pb.encpath`/r/(all)/overview`}>
-        All Resources
-      </AllResourcesLink>
+      <ViewLinkSection>
+        <ViewLink to="/overview" role="menuitem">
+          <TableViewIcon role="presentation" />
+          <ViewLinkText>
+            Table <SrOnly>View</SrOnly>
+          </ViewLinkText>
+        </ViewLink>
+        <HeaderDivider role="presentation" />
+        <ViewLink to={pb.encpath`/r/(all)/overview`} role="menuitem">
+          <DetailViewIcon role="presentation" />
+          <ViewLinkText>
+            Detail <SrOnly>View</SrOnly>
+          </ViewLinkText>
+        </ViewLink>
+      </ViewLinkSection>
       <AllResourceStatusSummary resources={resources} />
       <CustomNav view={props.view} />
       <GlobalNav {...globalNavProps} />

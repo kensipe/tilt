@@ -43,10 +43,7 @@ export const MenuButtonMixin = `
   justify-content: center;
   align-items: center;
   transition: color ${AnimDuration.default} ease;
-  padding-top: ${SizeUnit(0.5)};
-  padding-left: ${SizeUnit(0.5)};
-  padding-right: ${SizeUnit(0.5)};
-  padding-bottom: ${SizeUnit(0.5)};
+  padding: ${SizeUnit(0.5)};
   font-size: ${FontSize.smallest};
   color: ${Color.blue};
   height: 100%;
@@ -209,7 +206,11 @@ export function GlobalNav(props: GlobalNavProps) {
   let accountMenuContent = <AccountMenuContent {...props} />
   let snapshotButton = props.snapshot.enabled ? (
     <MenuButtonLabeled label="Snapshot">
-      <MenuButton onClick={props.snapshot.openModal}>
+      <MenuButton
+        onClick={props.snapshot.openModal}
+        role="menuitem"
+        aria-label="Snapshot"
+      >
         <SnapshotIcon width="24" height="24" />
       </MenuButton>
     </MenuButtonLabeled>
@@ -224,7 +225,10 @@ export function GlobalNav(props: GlobalNavProps) {
           ref={updateButton}
           onClick={() => toggleUpdateDialog(AnalyticsAction.Click)}
           data-open={updateDialogOpen}
+          aria-expanded={updateDialogOpen}
           aria-label={versionButtonLabel}
+          aria-haspopup="true"
+          role="menuitem"
         >
           <div>v{props.runningBuild?.version || "?"}</div>
 
@@ -241,7 +245,10 @@ export function GlobalNav(props: GlobalNavProps) {
           ref={shortcutButton}
           onClick={() => toggleShortcutsDialog(AnalyticsAction.Click)}
           data-open={shortcutsDialogOpen}
+          aria-expanded={shortcutsDialogOpen}
           aria-label="Help"
+          aria-haspopup="true"
+          role="menuitem"
         >
           <HelpIcon width="24" height="24" />
         </MenuButton>
@@ -251,7 +258,10 @@ export function GlobalNav(props: GlobalNavProps) {
           ref={accountButton}
           onClick={() => toggleAccountMenu(AnalyticsAction.Click)}
           data-open={accountMenuOpen}
+          aria-expanded={accountMenuOpen}
           aria-label="Account"
+          aria-haspopup="true"
+          role="menuitem"
         >
           <AccountIcon width="24" height="24" />
         </MenuButton>
